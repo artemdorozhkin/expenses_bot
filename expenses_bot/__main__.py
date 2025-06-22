@@ -7,7 +7,7 @@ load_dotenv()
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters
 
-from expenses_bot import handlers
+from expenses_bot.infrastructure import handlers
 
 
 def main():

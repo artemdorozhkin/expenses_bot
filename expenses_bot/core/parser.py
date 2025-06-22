@@ -1,9 +1,17 @@
 from datetime import datetime
 
-from expenses_bot.models import Expense
+from expenses_bot.core.models import Expense
 
 
 def parse_expenses(user_input: str) -> list[Expense]:
+    """
+    Parses user input into list of Expense's.
+
+    user_input: str
+
+    raises:
+        ValueError when cant parse input
+    """
     return [
         _parse_line_to_expense(line)
         for line in map(str.strip, user_input.splitlines())

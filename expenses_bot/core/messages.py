@@ -1,4 +1,4 @@
-from expenses_bot.models import Expense
+from expenses_bot.core.models import Expense
 
 
 def create_confirm_message(expenses: list[Expense]) -> str:

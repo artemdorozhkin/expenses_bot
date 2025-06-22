@@ -1,7 +1,7 @@
 import sqlite3
 import difflib
 
-from expenses_bot import repository
+from expenses_bot.infrastructure import repository
 
 
 def validate_category(conn: sqlite3.Connection, name: str) -> str | None:

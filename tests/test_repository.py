@@ -3,8 +3,8 @@ import sqlite3
 
 import pytest
 
-from expenses_bot import repository
-from expenses_bot.models import Category, Expense
+from expenses_bot.infrastructure import repository
+from expenses_bot.core.models import Category, Expense
 
 
 @pytest.fixture(autouse=True)

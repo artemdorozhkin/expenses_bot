@@ -1,7 +1,7 @@
 from datetime import date
 import sqlite3
 
-from expenses_bot.models import Category, Expense
+from expenses_bot.core.models import Category, Expense
 
 
 def get_all_categories(conn: sqlite3.Connection) -> list[Category]:

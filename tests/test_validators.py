@@ -2,7 +2,7 @@ import sqlite3
 
 import pytest
 
-from expenses_bot import validators
+from expenses_bot.core import validators
 
 
 @pytest.fixture(autouse=True)
