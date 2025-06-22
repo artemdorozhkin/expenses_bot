@@ -1,4 +1,5 @@
 .specs
+.env
 
 .venv
 __pycache__
