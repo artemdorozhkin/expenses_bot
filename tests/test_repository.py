@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime
 import sqlite3
 
 import pytest
 
 from expenses_bot import repository
-from expenses_bot.models import Expense
+from expenses_bot.models import Category, Expense
 
 
 @pytest.fixture(autouse=True)
@@ -30,9 +30,24 @@ def test_get_all_categories(conn: sqlite3.Connection):
 
 def test_create_category(conn: sqlite3.Connection):
     repository.create_category(conn, "Новая")
-    categories = repository.get_all_categories(conn)
+    rows = conn.execute("SELECT * FROM category").fetchall()
 
-    assert categories[-1].name == "Новая"
+    assert rows[-1] == (7, "Новая")
+
+
+def test_get_category_by_id(conn: sqlite3.Connection):
+    cid = 3
+
+    category = repository.get_category_by_id(conn, cid)
+
+    assert category == Category("Фаст фуд")
+
+
+def test_missing_get_category_by_id(conn: sqlite3.Connection):
+    cid = 69
+
+    with pytest.raises(ValueError):
+        _ = repository.get_category_by_id(conn, cid)
 
 
 def test_create_expenses(conn: sqlite3.Connection):
@@ -56,3 +71,61 @@ def test_create_expenses(conn: sqlite3.Connection):
     assert len(data) > 0
     assert data[0] == (1, 1, 69.0, current_date.strftime("%Y-%m-%d"))
     assert data[1] == (2, 2, 42.69, current_date.strftime("%Y-%m-%d"))
+
+
+def test_get_all_expenses(conn: sqlite3.Connection):
+    conn.execute(
+        """
+    INSERT INTO expense (category_id, amount, created_at)
+    VALUES 
+    (1, 69.0, "1970-01-01"), 
+    (2, 42.69, "1970-01-01")
+    """
+    )
+
+    expenses = repository.get_all_expenses(conn)
+
+    assert len(expenses) > 0
+    assert expenses[0] == Expense(
+        category="Продукты",
+        amount=69.0,
+        created_at=date.fromisoformat("1970-01-01"),
+    )
+    assert expenses[1] == Expense(
+        category="Бытовая химия",
+        amount=42.69,
+        created_at=date.fromisoformat("1970-01-01"),
+    )
+
+
+def test_get_expense_by_id(conn: sqlite3.Connection):
+    conn.execute(
+        """
+    INSERT INTO expense (category_id, amount, created_at)
+    VALUES 
+    (1, 69.0, "1970-01-01"), 
+    (2, 42.69, "1970-01-01")
+    """
+    )
+
+    expense = repository.get_expense_by_id(conn, eid=2)
+
+    assert expense == Expense(
+        category="Бытовая химия",
+        amount=42.69,
+        created_at=date.fromisoformat("1970-01-01"),
+    )
+
+
+def test_missing_get_expense_by_id(conn: sqlite3.Connection):
+    conn.execute(
+        """
+    INSERT INTO expense (category_id, amount, created_at)
+    VALUES 
+    (1, 69.0, "1970-01-01"), 
+    (2, 42.69, "1970-01-01")
+    """
+    )
+
+    with pytest.raises(ValueError):
+        _ = repository.get_expense_by_id(conn, eid=69)
