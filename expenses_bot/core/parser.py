@@ -21,6 +21,9 @@ def parse_expenses(user_input: str) -> list[Expense]:
 
 def _parse_line_to_expense(line: str) -> Expense:
     parts = line.split(" ")
+    if len(parts) < 2:
+        raise ValueError(f"Incorrect input, can't parse '{line}'")
+
     current_date = datetime.now().date()
 
     for i in (0, -1):

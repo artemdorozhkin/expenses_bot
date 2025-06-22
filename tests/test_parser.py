@@ -41,5 +41,13 @@ def test_two_correct_expense():
 
 def test_incorrect_expense():
     user_input = "hello world"
+
+    with pytest.raises(ValueError):
+        _ = parser.parse_expenses(user_input)
+
+
+def test_send_only_amount():
+    user_input = "69"
+
     with pytest.raises(ValueError):
         _ = parser.parse_expenses(user_input)
