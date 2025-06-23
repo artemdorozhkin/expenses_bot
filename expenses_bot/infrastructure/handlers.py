@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from expenses_bot.core import config
-from expenses_bot.core.decorators import only_admin
+from expenses_bot.core.decorators import only_admin, only_users
 from expenses_bot.core.handlers import category_handler, expanse_handler, user_handler
 from expenses_bot.infrastructure import db
 
@@ -34,7 +34,7 @@ async def user(update: Update, _: ContextTypes.DEFAULT_TYPE):
     await msg.reply_markdown_v2(response)
 
 
-@only_admin
+@only_users
 async def category(update: Update, _: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg:
@@ -45,7 +45,7 @@ async def category(update: Update, _: ContextTypes.DEFAULT_TYPE):
     await msg.reply_markdown_v2(response)
 
 
-@only_admin
+@only_users
 async def parse_expense(update: Update, _: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg:

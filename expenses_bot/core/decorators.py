@@ -14,26 +14,36 @@ def only_admin(func):
         if args:
             update = args[0]
         else:
-            update = kwargs.get("mid")
+            update = kwargs.get("update")
 
-        if not update:
-            return handlers.not_allowed(*args, **kwargs)
+        if update and update.message and update.message.from_user:
+            sender_id = update.message.from_user.id
+            if isinstance(sender_id, int) and sender_id == int(os.getenv("ADMIN")):
+                return func(*args, **kwargs)
 
-        msg = update.message
-        if not msg:
-            return handlers.not_allowed(*args, **kwargs)
+        return handlers.not_allowed(*args, **kwargs)
 
-        sender = msg.from_user
-        if not sender:
-            return handlers.not_allowed(*args, **kwargs)
+    return wrapper
 
-        with db.session(config.DB_FILE) as conn:
-            users = repository.get_all_users(conn)
-        if isinstance(sender.id, int) and sender.id in (
-            *users,
-            int(os.getenv("ADMIN")),
-        ):
-            return func(*args, **kwargs)
+
+def only_users(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        update: Update | None = None
+        if args:
+            update = args[0]
+        else:
+            update = kwargs.get("update")
+
+        if update and update.message and update.message.from_user:
+            sender_id = update.message.from_user.id
+            with db.session(config.DB_FILE) as conn:
+                users = repository.get_all_users(conn)
+                users.append(int(os.getenv("ADMIN")))
+
+            if isinstance(sender_id, int) and sender_id in users:
+                return func(*args, **kwargs)
+
         return handlers.not_allowed(*args, **kwargs)
 
     return wrapper
