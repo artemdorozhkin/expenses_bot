@@ -2,8 +2,8 @@ import sqlite3
 
 from telegram import InlineKeyboardMarkup
 
-from expenses_bot.core import messages, parser, validators
-from expenses_bot.core import keyboards
+from expenses_bot.core import messages, parser, validators, keyboards, config
+from expenses_bot.infrastructure import db, repository
 
 
 def handle_expanse_input(
@@ -35,3 +35,14 @@ def handle_expanse_input(
             e.category = guess
 
     return messages.create_confirm_message(expenses=expenses), keyboards.add_expense()
+
+
+def handle_add_user(conn: sqlite3.Connection, user_input: str) -> str:
+    try:
+        user_id = int(user_input.split(" ")[-1])
+    except ValueError:
+        return "Не удалось добавить пользователя"
+
+    with db.session(config.DB_FILE) as conn:
+        repository.create_user(conn, user_id)
+    return f"Пользователь {user_id} добавлен"

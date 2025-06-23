@@ -1,9 +1,10 @@
 from functools import wraps
 import os
 
-from telegram import Message, Update, User
+from telegram import Update
 
-from expenses_bot.infrastructure import handlers
+from expenses_bot.core import config
+from expenses_bot.infrastructure import db, handlers, repository
 
 
 def only_admin(func):
@@ -26,8 +27,11 @@ def only_admin(func):
         if not sender:
             return handlers.not_allowed(*args, **kwargs)
 
-        if isinstance(sender.id, int) and sender.id in map(
-            int, os.getenv("USERS").split(",")
+        with db.session(config.DB_FILE) as conn:
+            users = repository.get_all_users(conn)
+        if isinstance(sender.id, int) and sender.id in (
+            *users,
+            int(os.getenv("ADMIN")),
         ):
             return func(*args, **kwargs)
         return handlers.not_allowed(*args, **kwargs)

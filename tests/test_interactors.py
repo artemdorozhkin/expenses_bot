@@ -39,7 +39,6 @@ def test_guess_category(conn: sqlite3.Connection):
 
     response, keyboard = interactors.handle_expanse_input(conn, user_input)
 
-    current_date = datetime.now().date().strftime("%d.%m.%Y")
     assert keyboard is not None
     kb_dict = keyboard.to_dict()
     assert "inline_keyboard" in kb_dict
@@ -100,3 +99,15 @@ def test_correct_parse_two_expenses(conn: sqlite3.Connection):
         "Сумма: 42.69\n\n"
         f"Дата: {current_date}"
     )
+
+
+def test_correct_add_user(conn: sqlite3.Connection):
+    response = interactors.handle_add_user(conn, "/user 69")
+
+    assert response == "Пользователь 69 добавлен"
+
+
+def test_cant_add_user(conn: sqlite3.Connection):
+    response = interactors.handle_add_user(conn, "/user")
+
+    assert response == "Не удалось добавить пользователя"

@@ -129,3 +129,24 @@ def test_missing_get_expense_by_id(conn: sqlite3.Connection):
 
     with pytest.raises(ValueError):
         _ = repository.get_expense_by_id(conn, eid=69)
+
+
+def test_get_all_users(conn: sqlite3.Connection):
+    conn.execute(
+        """
+    INSERT INTO user (user_id) VALUES (69), (42)
+        """
+    )
+
+    users = repository.get_all_users(conn)
+
+    assert len(users) == 2
+
+
+def test_create_user(conn: sqlite3.Connection):
+    repository.create_user(conn, 69)
+    repository.create_user(conn, 42)
+
+    users = conn.execute("SELECT * FROM user").fetchall()
+
+    assert len(users) == 2

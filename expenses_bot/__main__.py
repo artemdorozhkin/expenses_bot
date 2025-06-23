@@ -2,14 +2,14 @@ import os
 
 from dotenv import load_dotenv
 
-from expenses_bot.core import config
-
 load_dotenv()
 
+
 from telegram import Update
-from telegram.ext import Application, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 from expenses_bot.infrastructure import db, handlers
+from expenses_bot.core import config
 
 
 def main():
@@ -21,6 +21,7 @@ def main():
         db.init(conn)
 
     bot = Application.builder().token(token=token).build()
+    bot.add_handler(CommandHandler(command="user", callback=handlers.add_user))
     bot.add_handler(MessageHandler(filters.TEXT, handlers.parse_expense))
 
     bot.run_polling(allowed_updates=Update.ALL_TYPES)
