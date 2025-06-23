@@ -8,6 +8,10 @@ def create_user(conn: sqlite3.Connection, user_id: int):
     conn.execute("INSERT INTO user (user_id) VALUES (?)", (user_id,))
 
 
+def remove_user(conn: sqlite3.Connection, user_id: int):
+    conn.execute("DELETE FROM user WHERE user_id = ?", (user_id,))
+
+
 def get_all_users(conn: sqlite3.Connection) -> list[int]:
     rows = conn.execute("SELECT user_id FROM user").fetchall()
     return [user_id for (user_id,) in rows]

@@ -20,7 +20,7 @@ async def not_allowed(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 @only_admin
-async def add_user(update: Update, _: ContextTypes.DEFAULT_TYPE):
+async def user(update: Update, _: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg:
         return None
@@ -29,8 +29,8 @@ async def add_user(update: Update, _: ContextTypes.DEFAULT_TYPE):
         return None
 
     with db.session(config.DB_FILE) as conn:
-        response = interactors.handle_add_user(conn, msg.text)
-    await msg.reply_text(response)
+        response = interactors.handle_user(conn, msg.text)
+    await msg.reply_markdown_v2(response)
 
 
 @only_admin

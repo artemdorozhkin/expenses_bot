@@ -102,12 +102,44 @@ def test_correct_parse_two_expenses(conn: sqlite3.Connection):
 
 
 def test_correct_add_user(conn: sqlite3.Connection):
-    response = interactors.handle_add_user(conn, "/user 69")
+    response = interactors.handle_user(conn, "/user add 69")
 
     assert response == "Пользователь 69 добавлен"
 
 
-def test_cant_add_user(conn: sqlite3.Connection):
-    response = interactors.handle_add_user(conn, "/user")
+def test_correct_rm_user(conn: sqlite3.Connection):
+    response = interactors.handle_user(conn, "/user rm 69")
 
-    assert response == "Не удалось добавить пользователя"
+    assert response == "Пользователь 69 удален"
+
+
+def test_correct_ls_user(conn: sqlite3.Connection):
+    repository.create_user(conn, 69)
+
+    response = interactors.handle_user(conn, "/user ls")
+
+    assert response == "Список id:\n`69`"
+
+
+def test_print_usage(conn: sqlite3.Connection):
+    usage = (
+        "`/user add` id \\- добавить пользователя по id\n"
+        "`/user rm` id \\- удалить пользователя по id\n"
+        "`/user ls` \\- список id пользователей"
+    )
+
+    response = interactors.handle_user(conn, "/user")
+
+    assert response == usage
+
+
+def test_error_print_usage(conn: sqlite3.Connection):
+    usage = (
+        "`/user add` id \\- добавить пользователя по id\n"
+        "`/user rm` id \\- удалить пользователя по id\n"
+        "`/user ls` \\- список id пользователей"
+    )
+
+    response = interactors.handle_user(conn, "/user dd 69")
+
+    assert response == f"Неизвестная команда dd\n\n{usage}"

@@ -21,7 +21,7 @@ def main():
         db.init(conn)
 
     bot = Application.builder().token(token=token).build()
-    bot.add_handler(CommandHandler(command="user", callback=handlers.add_user))
+    bot.add_handler(CommandHandler(command="user", callback=handlers.user))
     bot.add_handler(MessageHandler(filters.TEXT, handlers.parse_expense))
 
     bot.run_polling(allowed_updates=Update.ALL_TYPES)
