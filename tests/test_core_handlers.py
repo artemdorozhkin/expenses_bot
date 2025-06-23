@@ -1,7 +1,7 @@
 from datetime import datetime
 import sqlite3
 
-from expenses_bot.core.handlers import expanse_handler, user_handler
+from expenses_bot.core.handlers import category_handler, expanse_handler, user_handler
 from expenses_bot.infrastructure import repository
 
 
@@ -131,3 +131,17 @@ def test_error_print_usage(conn: sqlite3.Connection):
     response = user_handler.handle(conn, "/user dd 69")
 
     assert response == f"Неизвестная команда dd\n\n{user_handler.USAGE}"
+
+
+def test_missing_category(conn: sqlite3.Connection):
+    response = category_handler.handle(conn)
+
+    assert response == "Категории еще не добавлены"
+
+
+def test_exists_category(conn: sqlite3.Connection):
+    repository.create_category(conn, "Продукты")
+
+    response = category_handler.handle(conn)
+
+    assert response == "*ДОБАВЛЕННЫЕ КАТЕГОРИИ*:\nПродукты"
