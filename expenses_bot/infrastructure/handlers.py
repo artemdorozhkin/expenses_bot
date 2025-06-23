@@ -27,4 +27,5 @@ async def parse_expense(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return None
 
     with db.session(config.DB_FILE) as conn:
-        await msg.reply_markdown_v2(interactors.handle_expanse_input(conn, msg.text))
+        text, keyboard = interactors.handle_expanse_input(conn, msg.text)
+        await msg.reply_markdown_v2(text=text, reply_markup=keyboard)
