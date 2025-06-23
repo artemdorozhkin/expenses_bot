@@ -2,8 +2,9 @@ import os
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from expenses_bot.core import config, interactors
+from expenses_bot.core import config
 from expenses_bot.core.decorators import only_admin
+from expenses_bot.core.handlers import expanse_handler, user_handler
 from expenses_bot.infrastructure import db
 
 
@@ -29,7 +30,7 @@ async def user(update: Update, _: ContextTypes.DEFAULT_TYPE):
         return None
 
     with db.session(config.DB_FILE) as conn:
-        response = interactors.handle_user(conn, msg.text)
+        response = user_handler.handle(conn, msg.text)
     await msg.reply_markdown_v2(response)
 
 
@@ -43,5 +44,5 @@ async def parse_expense(update: Update, _: ContextTypes.DEFAULT_TYPE):
         return None
 
     with db.session(config.DB_FILE) as conn:
-        text, keyboard = interactors.handle_expanse_input(conn, msg.text)
+        text, keyboard = expanse_handler.handle(conn, msg.text)
         await msg.reply_markdown_v2(text=text, reply_markup=keyboard)

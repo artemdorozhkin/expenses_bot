@@ -7,7 +7,7 @@ def add_category(name: str) -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton(
                     text=f"Добавить: {name}",
-                    callback_data=f"add_category",
+                    callback_data="add_category",
                 )
             ]
         ]

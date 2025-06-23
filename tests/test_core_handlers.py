@@ -1,14 +1,14 @@
 from datetime import datetime
 import sqlite3
 
-from expenses_bot.core import interactors
+from expenses_bot.core.handlers import expanse_handler, user_handler
 from expenses_bot.infrastructure import repository
 
 
 def test_cant_parse_input(conn: sqlite3.Connection):
     user_input = "69"
 
-    response, keyboard = interactors.handle_expanse_input(conn, user_input)
+    response, keyboard = expanse_handler.handle(conn, user_input)
 
     assert keyboard is None
     assert response == (
@@ -21,7 +21,7 @@ def test_cant_parse_input(conn: sqlite3.Connection):
 def test_cant_find_expense_category(conn: sqlite3.Connection):
     user_input = "69 продукты"
 
-    response, keyboard = interactors.handle_expanse_input(conn, user_input)
+    response, keyboard = expanse_handler.handle(conn, user_input)
 
     assert keyboard is not None
     kb_dict = keyboard.to_dict()
@@ -37,7 +37,7 @@ def test_guess_category(conn: sqlite3.Connection):
     repository.create_category(conn, "Продукты")
     user_input = "69 продукт"
 
-    response, keyboard = interactors.handle_expanse_input(conn, user_input)
+    response, keyboard = expanse_handler.handle(conn, user_input)
 
     assert keyboard is not None
     kb_dict = keyboard.to_dict()
@@ -56,7 +56,7 @@ def test_correct_parse_one_expense(conn: sqlite3.Connection):
     repository.create_category(conn, "Продукты")
     user_input = "69 продукты"
 
-    response, keyboard = interactors.handle_expanse_input(conn, user_input)
+    response, keyboard = expanse_handler.handle(conn, user_input)
 
     current_date = datetime.now().date().strftime("%d.%m.%Y")
     assert keyboard is not None
@@ -79,7 +79,7 @@ def test_correct_parse_two_expenses(conn: sqlite3.Connection):
     repository.create_category(conn, "Бытовая химия")
     user_input = "69 продукты\nбытовая химия 42.69"
 
-    response, keyboard = interactors.handle_expanse_input(conn, user_input)
+    response, keyboard = expanse_handler.handle(conn, user_input)
 
     current_date = datetime.now().date().strftime("%d.%m.%Y")
     assert keyboard is not None
@@ -102,13 +102,13 @@ def test_correct_parse_two_expenses(conn: sqlite3.Connection):
 
 
 def test_correct_add_user(conn: sqlite3.Connection):
-    response = interactors.handle_user(conn, "/user add 69")
+    response = user_handler.handle(conn, "/user add 69")
 
     assert response == "Пользователь 69 добавлен"
 
 
 def test_correct_rm_user(conn: sqlite3.Connection):
-    response = interactors.handle_user(conn, "/user rm 69")
+    response = user_handler.handle(conn, "/user rm 69")
 
     assert response == "Пользователь 69 удален"
 
@@ -116,30 +116,18 @@ def test_correct_rm_user(conn: sqlite3.Connection):
 def test_correct_ls_user(conn: sqlite3.Connection):
     repository.create_user(conn, 69)
 
-    response = interactors.handle_user(conn, "/user ls")
+    response = user_handler.handle(conn, "/user ls")
 
     assert response == "Список id:\n`69`"
 
 
 def test_print_usage(conn: sqlite3.Connection):
-    usage = (
-        "`/user add` id \\- добавить пользователя по id\n"
-        "`/user rm` id \\- удалить пользователя по id\n"
-        "`/user ls` \\- список id пользователей"
-    )
+    response = user_handler.handle(conn, "/user")
 
-    response = interactors.handle_user(conn, "/user")
-
-    assert response == usage
+    assert response == user_handler.USAGE
 
 
 def test_error_print_usage(conn: sqlite3.Connection):
-    usage = (
-        "`/user add` id \\- добавить пользователя по id\n"
-        "`/user rm` id \\- удалить пользователя по id\n"
-        "`/user ls` \\- список id пользователей"
-    )
+    response = user_handler.handle(conn, "/user dd 69")
 
-    response = interactors.handle_user(conn, "/user dd 69")
-
-    assert response == f"Неизвестная команда dd\n\n{usage}"
+    assert response == f"Неизвестная команда dd\n\n{user_handler.USAGE}"
