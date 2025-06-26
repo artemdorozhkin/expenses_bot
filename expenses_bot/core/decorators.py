@@ -14,8 +14,8 @@ async def not_allowed(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await context.bot.send_message(
-        chat_id=int(os.getenv("ADMIN")),
-        text=f"{msg.from_user.id=}",
+        chat_id=config.ADMIN_ID,
+        text=f"{msg.from_user.id if msg.from_user else None}",
     )
     await msg.reply_markdown_v2("*Доступ запрещен*")
 
@@ -31,7 +31,8 @@ def only_admin(func):
 
         if update and update.message and update.message.from_user:
             sender_id = update.message.from_user.id
-            if isinstance(sender_id, int) and sender_id == int(os.getenv("ADMIN")):
+
+            if isinstance(sender_id, int) and sender_id == config.ADMIN_ID:
                 return func(*args, **kwargs)
 
         return not_allowed(*args, **kwargs)
@@ -52,7 +53,7 @@ def only_users(func):
             sender_id = update.message.from_user.id
             with db.session(config.DB_FILE) as conn:
                 users = repository.get_all_users(conn)
-                users.append(int(os.getenv("ADMIN")))
+                users.append(config.ADMIN_ID)
 
             if isinstance(sender_id, int) and sender_id in users:
                 return func(*args, **kwargs)
