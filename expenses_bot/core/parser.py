@@ -3,7 +3,7 @@ from datetime import datetime
 from expenses_bot.core.models import Expense
 
 
-def parse_expenses(user_input: str) -> tuple[Expense]:
+def parse_expenses(user_input: str) -> tuple[Expense, ...]:
     """
     Parses user input into list of Expense's.
 
@@ -12,7 +12,7 @@ def parse_expenses(user_input: str) -> tuple[Expense]:
     raises:
         ValueError when cant parse input
     """
-    return (
+    return tuple(
         _parse_line_to_expense(line)
         for line in map(str.strip, user_input.splitlines())
         if line

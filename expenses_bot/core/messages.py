@@ -1,7 +1,7 @@
 from expenses_bot.core.models import Expense
 
 
-def create_confirm_message(expenses: list[Expense]) -> str:
+def create_confirm_message(expenses: tuple[Expense, ...]) -> str:
     agregated: dict[str, float] = {}
     for e in expenses:
         if e.category in agregated:

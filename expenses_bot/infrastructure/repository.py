@@ -66,7 +66,7 @@ def get_expense_by_id(conn: sqlite3.Connection, eid: int) -> Expense:
     )
 
 
-def create_expenses(conn: sqlite3.Connection, expenses: list[Expense]):
+def create_expenses(conn: sqlite3.Connection, expenses: tuple[Expense, ...]):
     cursor = conn.cursor()
 
     categories = cursor.execute("SELECT * FROM category")
