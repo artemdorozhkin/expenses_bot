@@ -4,13 +4,14 @@ from telegram.constants import ParseMode
 
 from expenses_bot.core import config, keyboards, messages, validators
 from expenses_bot.core.decorators import only_users
-from expenses_bot.core.handlers import expense_handler
+from expenses_bot.core.handlers import expense
 from expenses_bot.core.models import Expense
-from expenses_bot.infrastructure import db
+from expenses_bot.infrastructure import db, repository
+from expenses_bot.core.handlers import category
 
 
 @only_users
-async def parse_expense(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg:
         return
@@ -18,10 +19,11 @@ async def parse_expense(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not msg.text:
         return
 
+    if not context.user_data:
+        return
+
     try:
-        context.user_data["expenses"] = tuple(
-            expense_handler.input_to_expenses(msg.text)
-        )
+        context.user_data["expenses"] = tuple(expense.handle(msg.text))
         context.user_data["eid"] = 0
         await confirm_categories(update, context)
     except ValueError:
@@ -34,7 +36,10 @@ async def parse_expense(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def confirm_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    expenses: tuple[Expense] = context.user_data.get("expenses", tuple())
+    if not context.user_data:
+        return
+
+    expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
     eid = context.user_data.get("eid", -1)
 
     if not expenses or eid == -1:
@@ -62,10 +67,13 @@ async def confirm_categories(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 async def show_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.user_data:
+        return
+
     msg = update.message
     bot = context.bot
 
-    expenses: tuple[Expense] = context.user_data.get("expenses", tuple())
+    expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
     text = messages.create_confirm_message(expenses)
     kb = keyboards.add_expense()
 
@@ -73,6 +81,9 @@ async def show_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.reply_markdown_v2(text, reply_markup=kb)
     else:
         callback = update.callback_query
+        if not callback:
+            return
+
         await callback.delete_message()
         await bot.send_message(
             chat_id=callback.from_user.id,
@@ -83,10 +94,13 @@ async def show_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def add_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.user_data:
+        return
+
     msg = update.message
     bot = context.bot
 
-    expenses: tuple[Expense] = context.user_data.get("expenses", tuple())
+    expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
     eid = context.user_data.get("eid", -1)
     expense = expenses[eid]
 
@@ -97,6 +111,9 @@ async def add_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.reply_markdown_v2(text, reply_markup=kb)
     else:
         callback = update.callback_query
+        if not callback:
+            return
+
         await callback.delete_message()
         await bot.send_message(
             chat_id=callback.from_user.id,
@@ -107,10 +124,13 @@ async def add_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def choose_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.user_data:
+        return
+
     msg = update.message
     bot = context.bot
 
-    expenses: tuple[Expense] = context.user_data.get("expenses", tuple())
+    expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
     eid = context.user_data.get("eid", -1)
     expense = expenses[eid]
     guessed_name = context.user_data.get("guessed_category", None)
@@ -124,10 +144,95 @@ async def choose_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.reply_markdown_v2(text, reply_markup=kb)
     else:
         callback = update.callback_query
+        if not callback:
+            return
+
         await callback.delete_message()
         await bot.send_message(
             chat_id=callback.from_user.id,
             text=text,
             reply_markup=kb,
             parse_mode=ParseMode.MARKDOWN_V2,
+        )
+
+
+async def add_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    callback = update.callback_query
+    if not callback:
+        return
+    if not callback.data:
+        return
+    if not context.user_data:
+        return
+
+    with db.session(config.DB_FILE) as conn:
+        expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
+        eid = context.user_data.get("eid", -1)
+
+        _, name = callback.data.split(":")
+        expenses[eid].category = name
+        context.user_data["eid"] += 1
+        context.user_data["expenses"] = expenses
+
+        category.handle(conn, name=name)
+
+        await callback.answer()
+        await confirm_categories(update, context)
+
+
+async def choose_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    callback = update.callback_query
+    if not callback:
+        return
+    if not callback.data:
+        return
+    if not context.user_data:
+        return
+
+    with db.session(config.DB_FILE) as conn:
+        expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
+        eid = context.user_data.get("eid", -1)
+
+        _, name = callback.data.split(":")
+        expenses[eid].category = name
+        context.user_data["eid"] += 1
+        context.user_data["expenses"] = expenses
+
+        await callback.answer()
+        await confirm_categories(update, context)
+
+
+async def add_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    callback = update.callback_query
+    if not callback:
+        return
+    if not callback.data:
+        return
+    if not context.user_data:
+        return
+
+    with db.session(config.DB_FILE) as conn:
+        expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
+        repository.create_expenses(conn, expenses)
+
+        await callback.answer()
+        await confirm_categories(update, context)
+
+
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    callback = update.callback_query
+    bot = context.bot
+    if not callback:
+        return
+    if not callback.data:
+        return
+    if not context.user_data:
+        return
+
+    with db.session(config.DB_FILE) as conn:
+        await callback.answer()
+        await callback.delete_message()
+        await bot.send_message(
+            text="Добавление расхода отменено",
+            chat_id=callback.from_user.id,
         )
