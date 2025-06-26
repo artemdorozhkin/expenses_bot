@@ -23,22 +23,25 @@ def create_categories(conn: sqlite3.Connection):
 def test_correct_category(conn: sqlite3.Connection):
     user_input = "продукты"
 
-    result = validators.validate_category(conn, user_input)
+    is_valid, result = validators.validate_category(conn, user_input)
 
+    assert is_valid == True
     assert "Продукты" == result
 
 
 def test_guess_category(conn: sqlite3.Connection):
     user_input = "транспортные"
 
-    result = validators.validate_category(conn, user_input)
+    is_valid, result = validators.validate_category(conn, user_input)
 
+    assert is_valid == False
     assert "Транспорт" == result
 
 
 def test_not_guess_category(conn: sqlite3.Connection):
     user_input = "Без категории"
 
-    result = validators.validate_category(conn, user_input)
+    is_valid, result = validators.validate_category(conn, user_input)
 
+    assert is_valid == False
     assert result is None

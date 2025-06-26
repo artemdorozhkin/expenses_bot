@@ -52,7 +52,7 @@ def test_missing_get_category_by_id(conn: sqlite3.Connection):
 
 def test_create_expenses(conn: sqlite3.Connection):
     current_date = datetime.now().date()
-    expenses = [
+    expenses = (
         Expense(
             category="Продукты",
             amount=69.0,
@@ -63,7 +63,7 @@ def test_create_expenses(conn: sqlite3.Connection):
             amount=42.69,
             created_at=current_date,
         ),
-    ]
+    )
 
     repository.create_expenses(conn, expenses)
     data = conn.execute("SELECT * FROM expense").fetchall()
