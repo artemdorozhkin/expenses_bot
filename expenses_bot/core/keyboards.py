@@ -15,7 +15,7 @@ def add_category(name: str) -> InlineKeyboardMarkup:
 
 
 def choose_category(add_new_name: str, guessed_name: str) -> InlineKeyboardMarkup:
-    buttons: list[tuple[str, str]] = [
+    buttons: list[dict[str, str]] = [
         {
             "text": f"Добавить: {add_new_name}",
             "data": f"add_category:{add_new_name}",
@@ -39,15 +39,19 @@ def choose_category(add_new_name: str, guessed_name: str) -> InlineKeyboardMarku
 
 
 def add_expense() -> InlineKeyboardMarkup:
-    buttons: list[tuple[str, str]] = [
-        ("Добавить расход", "add_expense"),
-        ("Изменить категорию", "edit_category"),
-        ("Изменить сумму", "edit_amount"),
-        ("Изменить дату", "edit_date"),
+    buttons: list[dict[str, str]] = [
+        {
+            "text": "Добавить расходы",
+            "data": "add_expenses",
+        },
+        {
+            "text": "Отмена",
+            "data": "cancel_add_expenses",
+        },
     ]
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton(text=button[0], callback_data=button[1])]
+            [InlineKeyboardButton(text=button["text"], callback_data=button["data"])]
             for button in buttons
         ]
     )
