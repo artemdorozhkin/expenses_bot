@@ -4,21 +4,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 from telegram import Update
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    CallbackQueryHandler,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import Application
 
+from expenses_bot.infrastructure.dialogs import expense_dialog
 from expenses_bot.infrastructure import db
-from expenses_bot.infrastructure.handlers import (
-    category_handler,
-    expense_handler,
-    user_handler,
+from expenses_bot.infrastructure.commands import (
+    category_cmd,
+    user_cmd,
 )
 from expenses_bot.core import config
 
@@ -33,16 +26,9 @@ def main():
 
     bot = Application.builder().token(token=token).build()
 
-    bot.add_handler(CommandHandler(command="user", callback=user_handler.user))
-    bot.add_handler(
-        CommandHandler(command="category", callback=category_handler.category)
-    )
-
-    bot.add_handler(
-        CallbackQueryHandler(category_handler.add_query, pattern="^add_category:.*")
-    )
-
-    bot.add_handler(MessageHandler(filters.TEXT, expense_handler.parse_expense))
+    bot.add_handler(user_cmd)
+    bot.add_handler(category_cmd)
+    bot.add_handlers(expense_dialog)
 
     bot.run_polling(allowed_updates=Update.ALL_TYPES)
 
