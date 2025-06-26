@@ -23,6 +23,10 @@ def handle(conn: sqlite3.Connection, user_input: str) -> str:
             user_id = -1
         except ValueError:
             return f"Не корректно вызвана команда /user\n\n{USAGE}"
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        return f"ID пользователя должен быть числом\n\n{USAGE}"
 
     try:
         response = _eval_user(conn, cmd, user_id)
@@ -34,7 +38,7 @@ def handle(conn: sqlite3.Connection, user_input: str) -> str:
 
 def _eval_user(
     conn: sqlite3.Connection,
-    cmd: Literal["add", "rm", "ls"],
+    cmd: str,
     user_id: int,
 ) -> str:
     commands = {

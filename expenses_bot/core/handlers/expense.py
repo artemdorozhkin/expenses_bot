@@ -2,9 +2,7 @@ from expenses_bot.core import parser
 from expenses_bot.core.models import Expense
 
 
-def input_to_expenses(
-    user_input: str,
-) -> tuple[Expense]:
+def handle(user_input: str) -> tuple[Expense, ...]:
     try:
         expenses = parser.parse_expenses(user_input=user_input)
     except ValueError as e:
