@@ -7,8 +7,9 @@ from telegram.ext import (
 from expenses_bot.infrastructure.dialogs import expense
 
 expense_dialog = [
-    MessageHandler(filters.TEXT, expense.start),
-    CallbackQueryHandler(expense.add_query, pattern="^add_category:.*"),
-    CallbackQueryHandler(expense.choose_query, pattern="^choose_category:.*"),
-    CallbackQueryHandler(expense.add_expenses, pattern="add_expenses"),
+    MessageHandler(callback=expense.start, filters=filters.TEXT),
+    CallbackQueryHandler(expense.add_category_query, pattern="^add_category:.*"),
+    CallbackQueryHandler(expense.choose_category_query, pattern="^choose_category:.*"),
+    CallbackQueryHandler(expense.add_expenses_query, pattern="add_expenses"),
+    CallbackQueryHandler(expense.cancel, pattern="cancel_add_expenses"),
 ]

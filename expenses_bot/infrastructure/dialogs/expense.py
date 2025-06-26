@@ -13,26 +13,21 @@ from expenses_bot.core.handlers import category
 @only_users
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
-    if not msg:
-        return
 
-    if not msg.text:
-        return
-
-    if not context.user_data:
-        return
-
-    try:
-        context.user_data["expenses"] = tuple(expense.handle(msg.text))
-        context.user_data["eid"] = 0
-        await confirm_categories(update, context)
-    except ValueError:
-        await msg.reply_markdown_v2(
-            (
-                "Не удалось получить данные о расходах\\. "
-                "Необходимо прислать сообщение в формате:\n`69 категория`"
+    container = {}
+    if msg and msg.text:
+        try:
+            container["expenses"] = tuple(expense.handle(msg.text))
+            container["eid"] = 0
+            context.user_data = container
+            await confirm_categories(update, context)
+        except ValueError:
+            await msg.reply_markdown_v2(
+                (
+                    "Не удалось получить данные о расходах\\. "
+                    "Необходимо прислать сообщение в формате:\n`69 категория`"
+                )
             )
-        )
 
 
 async def confirm_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -156,7 +151,7 @@ async def choose_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
-async def add_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def add_category_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     callback = update.callback_query
     if not callback:
         return
@@ -180,7 +175,7 @@ async def add_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await confirm_categories(update, context)
 
 
-async def choose_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def choose_category_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     callback = update.callback_query
     if not callback:
         return
@@ -202,7 +197,7 @@ async def choose_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await confirm_categories(update, context)
 
 
-async def add_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def add_expenses_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     callback = update.callback_query
     if not callback:
         return
@@ -216,7 +211,11 @@ async def add_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE):
         repository.create_expenses(conn, expenses)
 
         await callback.answer()
-        await confirm_categories(update, context)
+        await callback.delete_message()
+        await context.bot.send_message(
+            chat_id=callback.from_user.id,
+            text="Расходы успешно добавлены!",
+        )
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):

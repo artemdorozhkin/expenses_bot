@@ -10,12 +10,7 @@ from expenses_bot.infrastructure import db
 @only_admin
 async def run(update: Update, _: ContextTypes.DEFAULT_TYPE):
     msg = update.message
-    if not msg:
-        return
-
-    if not msg.text:
-        return
-
-    with db.session(config.DB_FILE) as conn:
-        response = user.handle(conn, msg.text)
-    await msg.reply_markdown_v2(response)
+    if msg and msg.text:
+        with db.session(config.DB_FILE) as conn:
+            response = user.handle(conn, msg.text)
+        await msg.reply_markdown_v2(response)

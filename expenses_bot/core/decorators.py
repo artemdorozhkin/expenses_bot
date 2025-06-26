@@ -1,6 +1,4 @@
 from functools import wraps
-import os
-
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -10,14 +8,12 @@ from expenses_bot.infrastructure import db, repository
 
 async def not_allowed(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
-    if not msg:
-        return
-
-    await context.bot.send_message(
-        chat_id=config.ADMIN_ID,
-        text=f"{msg.from_user.id if msg.from_user else None}",
-    )
-    await msg.reply_markdown_v2("*Доступ запрещен*")
+    if msg:
+        await context.bot.send_message(
+            chat_id=config.ADMIN_ID,
+            text=f"{msg.from_user.id if msg.from_user else None}",
+        )
+        await msg.reply_markdown_v2("*Доступ запрещен*")
 
 
 def only_admin(func):
