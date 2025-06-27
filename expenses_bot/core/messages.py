@@ -24,3 +24,23 @@ def create_not_guess_category_message(
         return f"Не удалось найти категорию '{original_name}'\\.\nВозможно имелась ввиду: '{guessed_name}'"
 
     return f"Не удалось найти категорию '{original_name}'\\.\nХотите создать новую?"
+
+
+def create_expenses_report(expenses: tuple[Expense, ...]) -> str:
+    total_amount: float = 0
+    agregated: dict[str, float] = {}
+    for e in expenses:
+        total_amount += e.amount
+        if e.category in agregated:
+            agregated[e.category] += e.amount
+        else:
+            agregated[e.category] = e.amount
+
+    text = ""
+    for category, amount in agregated.items():
+        text += f"`{category:<25}: {str(amount).replace('.', '\\.')}`\n"
+
+    text += (
+        f"\n`{'Общая сумма за период':<25}: {str(total_amount).replace('.', '\\.')}`"
+    )
+    return text

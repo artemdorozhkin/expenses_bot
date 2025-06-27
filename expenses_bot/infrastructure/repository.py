@@ -34,6 +34,26 @@ def create_category(conn: sqlite3.Connection, name: str):
     conn.execute("INSERT INTO category (name) VALUES (?)", (name,))
 
 
+def get_expenses_starts_with_date(
+    conn: sqlite3.Connection,
+    start_date: date,
+) -> list[Expense]:
+    rows = conn.execute("SELECT * FROM expense WHERE created_at >= ?", (start_date,))
+
+    expenses = []
+    for _, category_id, amount, created_at in rows:
+        category = get_category_by_id(conn, category_id)
+
+        expenses.append(
+            Expense(
+                category=category.name,
+                amount=amount,
+                created_at=date.fromisoformat(created_at),
+            )
+        )
+    return expenses
+
+
 def get_all_expenses(conn: sqlite3.Connection) -> list[Expense]:
     rows = conn.execute("SELECT * FROM expense").fetchall()
 

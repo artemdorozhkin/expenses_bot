@@ -131,6 +131,28 @@ def test_missing_get_expense_by_id(conn: sqlite3.Connection):
         _ = repository.get_expense_by_id(conn, eid=69)
 
 
+def test_get_expenses_starts_with_date(conn: sqlite3.Connection):
+    conn.execute(
+        """
+    INSERT INTO expense (category_id, amount, created_at)
+    VALUES 
+    (1, 69.0, "1970-01-01"), 
+    (2, 42.69, "2025-01-01")
+    """
+    )
+
+    expenses = repository.get_expenses_starts_with_date(
+        conn, date.fromisoformat("2025-01-01")
+    )
+
+    assert len(expenses) == 1
+    assert expenses[0] == Expense(
+        category="Бытовая химия",
+        amount=42.69,
+        created_at=date.fromisoformat("2025-01-01"),
+    )
+
+
 def test_get_all_users(conn: sqlite3.Connection):
     conn.execute(
         """

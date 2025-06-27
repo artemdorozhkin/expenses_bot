@@ -4,7 +4,7 @@ from telegram.constants import ParseMode
 
 from expenses_bot.core import config, keyboards, messages, validators
 from expenses_bot.core.decorators import only_users
-from expenses_bot.core.handlers import expense
+from expenses_bot.core.handlers import expense as expense_handler
 from expenses_bot.core.models import Expense
 from expenses_bot.infrastructure import db, repository
 from expenses_bot.core.handlers import category
@@ -14,12 +14,10 @@ from expenses_bot.core.handlers import category
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
 
-    container = {}
     if msg and msg.text:
         try:
-            container["expenses"] = tuple(expense.handle(msg.text))
-            container["eid"] = 0
-            context.user_data = container
+            context.user_data["expenses"] = expense_handler.handle(None, msg.text)
+            context.user_data["eid"] = 0
             await confirm_categories(update, context)
         except ValueError:
             await msg.reply_markdown_v2(
@@ -37,16 +35,17 @@ async def confirm_categories(update: Update, context: ContextTypes.DEFAULT_TYPE)
     expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
     eid = context.user_data.get("eid", -1)
 
-    if not expenses or eid == -1:
+    if len(expenses) == 0 or eid == -1:
         return
 
     if len(expenses) <= eid:
         await show_summary(update, context)
         return
 
-    expense = expenses[eid]
     with db.session(config.DB_FILE) as conn:
-        is_valid, guessed_name = validators.validate_category(conn, expense.category)
+        is_valid, guessed_name = validators.validate_category(
+            conn, expenses[eid].category
+        )
         if is_valid:
             expenses[eid].category = guessed_name
             context.user_data["eid"] += 1

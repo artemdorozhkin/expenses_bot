@@ -12,6 +12,7 @@ from expenses_bot.infrastructure import db
 from expenses_bot.infrastructure.commands import (
     category_cmd,
     user_cmd,
+    expense_cmd_dialog,
 )
 from expenses_bot.core import config
 
@@ -28,6 +29,7 @@ def main():
 
     bot.add_handler(user_cmd)
     bot.add_handler(category_cmd)
+    bot.add_handlers(expense_cmd_dialog)
     bot.add_handlers(expense_dialog)
 
     bot.run_polling(allowed_updates=Update.ALL_TYPES)

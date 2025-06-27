@@ -75,3 +75,34 @@ def test_not_guessed_category():
         text
         == f"Не удалось найти категорию '{original_name}'\\.\nХотите создать новую?"
     )
+
+
+def test_cteate_expenses_report():
+    current_date = datetime.now().date()
+    expenses = (
+        Expense(
+            category="Продукты",
+            amount=34.0,
+            created_at=current_date,
+        ),
+        Expense(
+            category="Продукты",
+            amount=35.0,
+            created_at=current_date,
+        ),
+        Expense(
+            category="Бытовая химия",
+            amount=42.69,
+            created_at=current_date,
+        ),
+    )
+
+    text = messages.create_expenses_report(expenses)
+
+    assert (
+        text
+        == """`Продукты                 : 69\\.0`
+`Бытовая химия            : 42\\.69`
+
+`Общая сумма за период    : 111\\.69`"""
+    )
