@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    env:
+      PYTHONPATH: $ {{ github.workspace }}/expenses_bot
+    
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+
+      - name: installing python
+        uses: actions/setup-python@v5
+        with:
+          python-vesion: '3.12'
+
+      - name: installing pipenv and dependencies
+        uses: |
+          python -m pip install --upgrade pip pipenv
+          pipenv install --dev
+
+      - name: run tests
+        uses: |
+          pipenv run pytest --tb=short --disable-warnings
+        
+      - name: cashing pipenv
+        uses: actions/cash@v4
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pipenv-
+  
+  deploy:
+
+    name: deploy
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+
+      - name: setups ssh-key
+        uses: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: copying files to the server
+        uses: |
+          rsync -avz --delete ./ ${{ secrets.SSH_USER}}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/applications/expenses_bot
+      
+      - name: restarting bot
+        uses: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/applications/expenses_bot
+            make install
+            sudo systemctl daemon-reexec
+            sudo systemctl daemon-reload
+            sudo systemctl restart expenses_bot.service
+            sudo systemctl status expenses_bot.service --no-pager
+          EOFkk
