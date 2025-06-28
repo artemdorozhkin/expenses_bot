@@ -38,9 +38,9 @@ def create_expenses_report(expenses: tuple[Expense, ...]) -> str:
 
     text = ""
     for category, amount in agregated.items():
-        text += f"`{category:<25}: {str(amount).replace('.', '\\.')}`\n"
+        str_amount = f"{amount:.2f}".replace(".", "\\.")
+        text += f"`{category:<25}: {str_amount}`\n"
 
-    text += (
-        f"\n`{'Общая сумма за период':<25}: {str(total_amount).replace('.', '\\.')}`"
-    )
+    str_total = f"{total_amount:.2f}".replace(".", "\\.")
+    text += f"\n`{'Общая сумма за период':<25}: {str_total}`"
     return text
