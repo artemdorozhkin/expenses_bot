@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from expenses_bot.core.models import Expense
 
@@ -24,7 +24,7 @@ def _parse_line_to_expense(line: str) -> Expense:
     if len(parts) < 2:
         raise ValueError(f"Incorrect input, can't parse '{line}'")
 
-    current_date = datetime.now().date()
+    current_date = datetime.now(timezone.utc).date()
 
     for i in (0, -1):
         amount = _float_or_none(parts[i])

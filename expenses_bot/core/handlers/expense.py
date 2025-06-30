@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import sqlite3
 from typing import Literal
 from expenses_bot.core import parser
@@ -12,13 +12,13 @@ def handle(
 ) -> tuple[Expense, ...]:
     if user_input in ("today", "week", "month") and conn:
         if user_input == "today":
-            starts_date = datetime.now().date()
+            starts_date = datetime.now(timezone.utc).date()
             expenses = repository.get_expenses_starts_with_date(conn, starts_date)
         elif user_input == "week":
-            starts_date = (datetime.now() - timedelta(days=7)).date()
+            starts_date = (datetime.now(timezone.utc) - timedelta(days=7)).date()
             expenses = repository.get_expenses_starts_with_date(conn, starts_date)
         elif user_input == "month":
-            starts_date = datetime.now().date().replace(day=1)
+            starts_date = datetime.now(timezone.utc).date().replace(day=1)
             expenses = repository.get_expenses_starts_with_date(conn, starts_date)
         else:
             raise ValueError(f"Не удалось обработать период {user_input}")
