@@ -169,6 +169,7 @@ async def add_category_query(update: Update, context: ContextTypes.DEFAULT_TYPE)
         context.user_data["expenses"] = expenses
 
         category.handle(conn, name=name)
+        conn.commit()
 
         await callback.answer()
         await confirm_categories(update, context)
