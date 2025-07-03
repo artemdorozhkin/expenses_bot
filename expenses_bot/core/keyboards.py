@@ -34,15 +34,15 @@ def choose_category(add_new_name: str, guessed_name: str) -> InlineKeyboardMarku
     return _make_markup(*buttons)
 
 
-def add_expense() -> InlineKeyboardMarkup:
+def add_expense(on_add_index: int) -> InlineKeyboardMarkup:
     buttons = [
         {
             "text": "Добавить расходы",
-            "data": "add_expenses",
+            "data": f"add_expenses:{on_add_index}",
         },
         {
             "text": "Отмена",
-            "data": "cancel_add_expenses",
+            "data": f"cancel_add_expenses:{on_add_index}",
         },
     ]
     return _make_markup(*buttons)

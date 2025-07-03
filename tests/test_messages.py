@@ -101,8 +101,41 @@ def test_cteate_expenses_report():
 
     assert (
         text
-        == """`Продукты                 : 69\\.0`
+        == """`Продукты                 : 69\\.00`
 `Бытовая химия            : 42\\.69`
 
 `Общая сумма за период    : 111\\.69`"""
+    )
+
+
+def test_create_expenses_successfully_added():
+    current_date = datetime.now().date()
+    expenses = (
+        Expense(
+            category="Продукты",
+            amount=34.0,
+            created_at=current_date,
+        ),
+        Expense(
+            category="Продукты",
+            amount=35.0,
+            created_at=current_date,
+        ),
+        Expense(
+            category="Бытовая химия",
+            amount=42.69,
+            created_at=current_date,
+        ),
+    )
+
+    text = messages.create_expenses_successfully_added(expenses)
+
+    assert (
+        text
+        == """*РАСХОДЫ УСПЕШНО ДОБАВЛЕНЫ*
+
+`Продукты                 : 34\\.00`
+`Продукты                 : 35\\.00`
+`Бытовая химия            : 42\\.69`
+"""
     )

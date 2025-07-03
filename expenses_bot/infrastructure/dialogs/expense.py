@@ -68,8 +68,14 @@ async def show_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
 
     expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
+    on_add_index: int = context.user_data.get("on_add_index", 0) or 0
+    context.user_data["on_add_index"] = on_add_index + 1
+    on_add: dict[int, tuple[Expense, ...]] = context.user_data.get("on_add", {}) or {}
+    on_add[on_add_index] = expenses
+    context.user_data["on_add"] = on_add
+
     text = messages.create_confirm_message(expenses)
-    kb = keyboards.add_expense()
+    kb = keyboards.add_expense(on_add_index)
 
     if msg:
         await msg.reply_markdown_v2(text, reply_markup=kb)
@@ -207,14 +213,25 @@ async def add_expenses_query(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
 
     with db.session(config.DB_FILE) as conn:
-        expenses: tuple[Expense, ...] = context.user_data.get("expenses", tuple())
+        on_add_index: int = int(callback.data.split(":")[-1])
+        on_add: dict[int, tuple[Expense, ...]] = context.user_data.get("on_add", {})
+        expenses: tuple[Expense, ...] = on_add.pop(on_add_index, tuple())
+
+        if len(on_add) == 0:
+            context.user_data["on_add"] = None
+            context.user_data["on_add_index"] = None
+        else:
+            context.user_data["on_add"] = on_add
+
         repository.create_expenses(conn, expenses)
 
         await callback.answer()
         await callback.delete_message()
+        text = messages.create_expenses_successfully_added(expenses)
         await context.bot.send_message(
             chat_id=callback.from_user.id,
-            text="Расходы успешно добавлены!",
+            text=text,
+            parse_mode=ParseMode.MARKDOWN_V2,
         )
 
 
@@ -229,6 +246,15 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     with db.session(config.DB_FILE) as conn:
+        on_add_index: int = int(callback.data.split(":")[-1])
+        on_add: dict[int, tuple[Expense, ...]] = context.user_data.get("on_add", {})
+        on_add.pop(on_add_index)
+        if len(on_add) == 0:
+            context.user_data["on_add"] = None
+            context.user_data["on_add_index"] = None
+        else:
+            context.user_data["on_add"] = on_add
+
         await callback.answer()
         await callback.delete_message()
         await bot.send_message(

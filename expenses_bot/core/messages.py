@@ -44,3 +44,12 @@ def create_expenses_report(expenses: tuple[Expense, ...]) -> str:
     str_total = f"{total_amount:.2f}".replace(".", "\\.")
     text += f"\n`{'Общая сумма за период':<25}: {str_total}`"
     return text
+
+
+def create_expenses_successfully_added(expenses: tuple[Expense, ...]) -> str:
+    text = "*РАСХОДЫ УСПЕШНО ДОБАВЛЕНЫ*\n\n"
+    for e in expenses:
+        str_amount = f"{e.amount:.2f}".replace(".", "\\.")
+        text += f"`{e.category:<25}: {str_amount}`\n"
+
+    return text
