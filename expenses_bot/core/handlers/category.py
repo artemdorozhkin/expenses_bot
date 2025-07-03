@@ -12,4 +12,4 @@ def handle(conn: sqlite3.Connection, name: str | None = None) -> str:
     if len(categories) == 0:
         return "Категории еще не добавлены"
 
-    return f"*ДОБАВЛЕННЫЕ КАТЕГОРИИ*:\n{'\n'.join([c.name for c in categories])}"
+    return f"*ДОБАВЛЕННЫЕ КАТЕГОРИИ*\n\n{'\n'.join([c.name for c in categories])}"
