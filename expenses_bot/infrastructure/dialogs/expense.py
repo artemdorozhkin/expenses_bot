@@ -223,7 +223,7 @@ async def add_expenses_query(update: Update, context: ContextTypes.DEFAULT_TYPE)
         else:
             context.user_data["on_add"] = on_add
 
-        repository.create_expenses(conn, expenses)
+        repository.create_expenses(conn, expenses, callback.from_user.id)
 
         await callback.answer()
         await callback.delete_message()

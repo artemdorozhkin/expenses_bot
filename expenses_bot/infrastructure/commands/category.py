@@ -12,7 +12,9 @@ async def run(update: Update, _: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg:
         return
+    if not msg.from_user:
+        return
 
     with db.session(config.DB_FILE) as conn:
-        response = category.handle(conn)
+        response = category.handle(conn, msg.from_user.id)
     await msg.reply_markdown_v2(response)

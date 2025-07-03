@@ -26,7 +26,9 @@ async def show_expenses_query(update: Update, context: ContextTypes.DEFAULT_TYPE
         with db.session(config.DB_FILE) as conn:
             await callback.delete_message()
             try:
-                response = expense.handle(conn, user_input=period)
+                response = expense.handle(
+                    conn, user_input=period, user_id=callback.from_user.id
+                )
             except ValueError as e:
                 return await context.bot.send_message(
                     chat_id=callback.from_user.id, text=str(e)

@@ -4,8 +4,10 @@ import difflib
 from expenses_bot.infrastructure import repository
 
 
-def validate_category(conn: sqlite3.Connection, name: str) -> tuple[bool, str | None]:
-    categories = repository.get_all_categories(conn)
+def validate_category(
+    conn: sqlite3.Connection, name: str, user_id: int
+) -> tuple[bool, str | None]:
+    categories = repository.get_all_categories(conn, user_id)
     names = [c.name for c in categories]
 
     for n in names:
