@@ -227,9 +227,11 @@ async def add_expenses_query(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
         await callback.answer()
         await callback.delete_message()
+        text = messages.create_expenses_successfully_added(expenses)
         await context.bot.send_message(
             chat_id=callback.from_user.id,
-            text="Расходы успешно добавлены!",
+            text=text,
+            parse_mode=ParseMode.MARKDOWN_V2,
         )
 
 
