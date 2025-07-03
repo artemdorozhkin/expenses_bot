@@ -17,7 +17,6 @@ async def run(update: Update, _: ContextTypes.DEFAULT_TYPE):
 
     with db.session(config.DB_FILE) as conn:
         query = msg.text[5:]
-        print(query)
         response = sql.handle(conn, query)
         if not response:
             await msg.reply_text("[]")
