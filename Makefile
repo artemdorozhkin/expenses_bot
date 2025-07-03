@@ -6,5 +6,8 @@ run:
 install:
 	pipenv install
 
+migrate:
+	pipenv run python migrate.py $(M)
+
 tests:
 	pipenv run python -m pytest tests
