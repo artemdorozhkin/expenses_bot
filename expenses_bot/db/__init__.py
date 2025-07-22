@@ -34,5 +34,5 @@ def session(path: str) -> Generator[sqlite3.Connection, Any, None]:
 
 
 def init(conn: sqlite3.Connection):
-    with open("schema.sql", "r", encoding="utf-8") as sql:
+    with open("expenses_bot/db/schema.sql", "r", encoding="utf-8") as sql:
         conn.executescript(sql.read())
