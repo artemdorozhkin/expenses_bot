@@ -7,15 +7,8 @@ load_dotenv()
 from telegram import Update
 from telegram.ext import Application
 
-from expenses_bot.infrastructure.dialogs import expense_dialog
-from expenses_bot.infrastructure import db
-from expenses_bot.infrastructure.commands import (
-    category_cmd,
-    user_cmd,
-    sql_cmd,
-    expense_cmd_dialog,
-)
-from expenses_bot.core import config
+from expenses_bot import db, config
+from expenses_bot.bot import dispatcher
 
 
 def main():
@@ -27,12 +20,7 @@ def main():
         db.init(conn)
 
     bot = Application.builder().token(token=token).build()
-
-    bot.add_handler(user_cmd)
-    bot.add_handler(category_cmd)
-    bot.add_handler(sql_cmd)
-    bot.add_handlers(expense_cmd_dialog)
-    bot.add_handlers(expense_dialog)
+    dispatcher.register_handlers(bot)
 
     bot.run_polling(allowed_updates=Update.ALL_TYPES)
 

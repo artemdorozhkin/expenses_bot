@@ -2,8 +2,8 @@ from functools import wraps
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from expenses_bot.core import config
-from expenses_bot.infrastructure import db, repository
+from expenses_bot import config, db
+from expenses_bot.db import repository
 
 
 async def not_allowed(update: Update, context: ContextTypes.DEFAULT_TYPE):

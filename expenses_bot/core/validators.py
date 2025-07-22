@@ -1,7 +1,7 @@
 import sqlite3
 import difflib
 
-from expenses_bot.infrastructure import repository
+from expenses_bot.db import repository
 
 
 def validate_category(conn: sqlite3.Connection, name: str) -> tuple[bool, str | None]:

@@ -3,13 +3,13 @@ import sqlite3
 
 import pytest
 
-from expenses_bot.core.handlers import expense
-from expenses_bot.core.models import Expense
+from expenses_bot.core import expense
+from expenses_bot.db.models import Expense
 
 
 def test_cant_parse_input():
     with pytest.raises(ValueError):
-        _ = expense.handle(None, "69")
+        _ = expense.parse_expenses_from_input("69")
 
 
 def test_correct_parse_one_expense():
@@ -17,7 +17,7 @@ def test_correct_parse_one_expense():
     current_date = datetime.now().date()
     expect = (Expense("продукты", 69, current_date),)
 
-    response = expense.handle(None, user_input)
+    response = expense.parse_expenses_from_input(user_input)
 
     assert response == expect
 
@@ -30,7 +30,7 @@ def test_correct_parse_two_expenses():
         Expense("бытовая химия", 42.69, current_date),
     )
 
-    response = expense.handle(None, user_input)
+    response = expense.parse_expenses_from_input(user_input)
 
     assert response == expect
 
@@ -55,7 +55,7 @@ def test_today_expenses(conn: sqlite3.Connection):
     )
     expect = (Expense("Бытовая химия", 42.69, datetime.now().date()),)
 
-    response = expense.handle(conn, "today")
+    response = expense.get_expenses_by_period(conn, "today")
 
     assert response == expect
 
@@ -89,7 +89,7 @@ def test_week_expenses(conn: sqlite3.Connection):
         ),
     )
 
-    response = expense.handle(conn, "week")
+    response = expense.get_expenses_by_period(conn, "week")
 
     assert response == expect
 
@@ -123,6 +123,6 @@ def test_current_month_expenses(conn: sqlite3.Connection):
         ),
     )
 
-    response = expense.handle(conn, "month")
+    response = expense.get_expenses_by_period(conn, "month")
 
     assert response == expect

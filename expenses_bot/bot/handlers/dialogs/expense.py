@@ -2,12 +2,12 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
-from expenses_bot.core import config, keyboards, messages, validators
-from expenses_bot.core.decorators import only_users
-from expenses_bot.core.handlers import expense as expense_handler
-from expenses_bot.core.models import Expense
-from expenses_bot.infrastructure import db, repository
-from expenses_bot.core.handlers import category
+from expenses_bot import config, db
+from expenses_bot.bot import keyboards, messages
+from expenses_bot.bot.decorators import only_users
+from expenses_bot.core import validators, expense as expense_handler, category
+from expenses_bot.db import repository
+from expenses_bot.db.models import Expense
 
 
 @only_users
@@ -16,7 +16,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if msg and msg.text:
         try:
-            context.user_data["expenses"] = expense_handler.handle(None, msg.text)
+            context.user_data["expenses"] = expense_handler.parse_expenses_from_input(
+                msg.text
+            )
             context.user_data["eid"] = 0
             await confirm_categories(update, context)
         except ValueError:
@@ -174,7 +176,7 @@ async def add_category_query(update: Update, context: ContextTypes.DEFAULT_TYPE)
         context.user_data["eid"] += 1
         context.user_data["expenses"] = expenses
 
-        category.handle(conn, name=name)
+        category.add(conn, name=name)
         conn.commit()
 
         await callback.answer()

@@ -1,6 +1,6 @@
 from telegram.ext import CommandHandler, CallbackQueryHandler
 
-from expenses_bot.infrastructure.commands import category, sql, user, expense
+from expenses_bot.bot.handlers.commands import category, sql, user, expense
 
 user_cmd = CommandHandler(command="user", callback=user.run)
 category_cmd = CommandHandler(command="category", callback=category.run)

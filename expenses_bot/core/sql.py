@@ -1,8 +1,9 @@
 import sqlite3
+
 from tabulate import tabulate
 
 
-def handle(conn: sqlite3.Connection, query: str) -> str:
+def execute(conn: sqlite3.Connection, query: str) -> str:
     try:
         cursor = conn.execute(query)
     except sqlite3.Error as e:

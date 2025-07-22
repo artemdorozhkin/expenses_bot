@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from expenses_bot.core.models import Expense
+from expenses_bot.db.models import Expense
 
 
 def parse_expenses(user_input: str) -> tuple[Expense, ...]:

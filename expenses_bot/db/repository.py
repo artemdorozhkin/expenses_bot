@@ -1,7 +1,7 @@
 from datetime import date
 import sqlite3
 
-from expenses_bot.core.models import Category, Expense
+from expenses_bot.db.models import Category, Expense
 
 
 def create_user(conn: sqlite3.Connection, user_id: int):

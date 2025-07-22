@@ -2,7 +2,7 @@ from datetime import datetime
 import pytest
 
 from expenses_bot.core import parser
-from expenses_bot.core.models import Expense
+from expenses_bot.db.models import Expense
 
 
 def test_one_correct_expense():

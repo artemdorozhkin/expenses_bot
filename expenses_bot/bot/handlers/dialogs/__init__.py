@@ -4,7 +4,7 @@ from telegram.ext import (
     filters,
 )
 
-from expenses_bot.infrastructure.dialogs import expense
+from expenses_bot.bot.handlers.dialogs import expense
 
 expense_dialog = [
     MessageHandler(callback=expense.start, filters=filters.TEXT),

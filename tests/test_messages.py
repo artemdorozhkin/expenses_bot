@@ -1,6 +1,7 @@
 from datetime import datetime
-from expenses_bot.core import messages
-from expenses_bot.core.models import Expense
+
+from expenses_bot.bot import messages
+from expenses_bot.db.models import Expense
 
 
 def test_cteate_one_expense_confirm():

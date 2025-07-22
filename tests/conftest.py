@@ -1,6 +1,6 @@
 import pytest
 
-from expenses_bot.infrastructure import db
+from expenses_bot import db
 
 
 @pytest.fixture
